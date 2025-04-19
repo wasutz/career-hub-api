@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne} from 'typeorm';
+import { UserEntity } from '../../user/models/user.entity';
 
 @Entity("jobs")
 export class JobEntity {
@@ -19,4 +20,7 @@ export class JobEntity {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @ManyToOne(() => UserEntity, (user) => user.jobs, { eager: true })
+  createdBy: UserEntity;
 }
