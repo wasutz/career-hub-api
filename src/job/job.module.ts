@@ -6,7 +6,6 @@ import { JobEntity } from './models/job.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([JobEntity])],
-  exports: [TypeOrmModule],
   controllers: [JobController],
   providers: [JobService],
 })
