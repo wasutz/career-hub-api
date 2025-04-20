@@ -23,8 +23,14 @@ export class JobService {
     return await this.jobRepository.save(job);
   }
 
-  async findAll(): Promise<JobEntity[]> {
-    return await this.jobRepository.find();
+  async findAll(page: number, pageSize: number) {
+    const [items, total] = await this.jobRepository.findAndCount({
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      order: { createdAt: 'DESC' },
+    });
+
+    return { items, total };
   }
 
   async findOne(id: string): Promise<JobEntity> {

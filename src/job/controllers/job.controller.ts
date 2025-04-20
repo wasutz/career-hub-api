@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put, Query } from '@nestjs/common';
 import { JobService } from '../services/job.service';
 import { CreateJobDto } from '../dto/create-job.dto';
 import { UpdateJobDto } from '../dto/update-job.dto';
@@ -7,6 +7,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { UserEntity } from '../../user/models/user.entity';
 import { User } from '../../auth/decorators/user.decorator';
 import { PatchJobDto } from '../dto/patch-job.dto';
+import { PaginationQueryDto } from '../dto/pagination-query.dto';
 
 @Controller('jobs')
 export class JobController {
@@ -19,8 +20,12 @@ export class JobController {
     }
 
     @Get()
-    findAll() {
-        return this.jobService.findAll();
+    findAll(
+        @Query() pagination: PaginationQueryDto
+    ) {
+        const { page, pageSize } = pagination;
+
+        return this.jobService.findAll(page, pageSize);
     }
 
     @Get(':id')
