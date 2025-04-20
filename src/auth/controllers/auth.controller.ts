@@ -5,7 +5,7 @@ import { LoginDto } from '../dto/login.dto';
 import { ApiOkResponse } from '@nestjs/swagger';
 import { LoggedInResponseDto } from '../dto/logged-in-response.dto';
 import { plainToInstance } from 'class-transformer';
-import { UserResponseDto } from 'src/user/dto/user-response.dto';
+import { UserResponseDto } from '../../user/dto/user-response.dto';
 
 @Controller('auth')
 export class AuthController {

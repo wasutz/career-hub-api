@@ -37,6 +37,7 @@ describe('JobService', () => {
             save: jest.fn(),
             find: jest.fn(),
             findOne: jest.fn(),
+            findAndCount: jest.fn(),
             delete: jest.fn(),
           },
         },
@@ -71,12 +72,12 @@ describe('JobService', () => {
 
   describe('findAll', () => {
     it('should return all jobs', async () => {
-      repo.find.mockResolvedValue([mockJob]);
+      repo.findAndCount.mockResolvedValue([[mockJob], 1]);
 
-      const result = await service.findAll();
+      const result = await service.findAll(0, 10);
 
-      expect(repo.find).toHaveBeenCalled();
-      expect(result).toEqual([mockJob]);
+      expect(repo.findAndCount).toHaveBeenCalled();
+      expect(result.items).toEqual([mockJob]);
     });
   });
 

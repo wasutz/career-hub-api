@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from '../services/auth.service';
-import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { CreateUserDto } from '../../user/dto/create-user.dto';
 import { LoginDto } from '../dto/login.dto';
+import { UserRole } from '../../user/models/user.entity';
 
 describe('AuthController', () => {
   let authController: AuthController;
@@ -40,7 +41,7 @@ describe('AuthController', () => {
   describe('register', () => {
     it('should register a user and return the result', async () => {
       const dto: CreateUserDto = { email: 'test@example.com', password: 'password123' };
-      const createdUser = { id: 1, ...dto };
+      const createdUser = { id: 1, email: dto.email, role: UserRole.USER };
       mockAuthService.register.mockResolvedValue(createdUser);
 
       const result = await authController.register(dto);

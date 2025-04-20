@@ -9,11 +9,9 @@ import { User } from '../../auth/decorators/user.decorator';
 import { PatchJobDto } from '../dto/patch-job.dto';
 import { PaginationQueryDto } from '../dto/pagination-query.dto';
 import { ApiOkResponse } from '@nestjs/swagger';
-import { JobEntity } from '../models/job.entity';
 import { plainToInstance } from 'class-transformer';
 import { JobResponseDto } from '../dto/job-response.dto';
-import { PaginationResponseDto } from 'src/common/dto/pagination.dto';
-import { ApiOkResponsePaginated } from 'src/common/decorators/paginated-response';
+import { ApiOkResponsePaginated } from '../../common/decorators/paginated-response';
 
 @Controller('jobs')
 export class JobController {
