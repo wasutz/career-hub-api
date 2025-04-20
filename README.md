@@ -1,21 +1,29 @@
 ## Career hub
 RESTful API for job posting.
 
-## Local development
+## Feature
+- User authentication with JWT
+- CRUD operations for job postings
+- Pagination support
+- Swagger API documentation
+
+## Getting Started
+
+### Local development
 
 ```bash
-$ docker-compose up -d
+$ docker-compose up
 ```
 
-## Run tests
+### Run tests
 
 ```bash
-# unit tests
 $ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
 ```
+
+### Tech Stack
+- NestJS
+- PostgreSQL
+- TypeORM
+- Docker & Docker Compose
+- Swagger (OpenAPI)
