@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: .
-    image: nextjs-dev
+    image: nestjs-dev
     ports:
       - "3000:3000"
     volumes:
@@ -12,6 +12,7 @@ services:
       - .env
     depends_on:
       - db
+    command: npm run start:dev
   db:
     image: postgres
     restart: always
