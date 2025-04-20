@@ -1,49 +1,65 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JobEntity } from '../models/job.entity';
 import { CreateJobDto } from '../dto/create-job.dto';
 import { UpdateJobDto } from '../dto/update-job.dto';
+import { UserEntity, UserRole } from '../../user/models/user.entity';
+import { PatchJobDto } from '../dto/patch-job.dto';
 
 @Injectable()
 export class JobService {
-    constructor(
-        @InjectRepository(JobEntity)
-        private readonly jobRepository: Repository<JobEntity>,
-    ) {}
+  constructor(
+    @InjectRepository(JobEntity)
+    private readonly jobRepository: Repository<JobEntity>,
+  ) { }
 
-    async create(createJobDto: CreateJobDto): Promise<JobEntity> {
-        const job = this.jobRepository.create(createJobDto);
+  async create(createJobDto: CreateJobDto, user: UserEntity): Promise<JobEntity> {
+    const job = this.jobRepository.create({
+      ...createJobDto,
+      createdBy: user,
+    });
 
-        return await this.jobRepository.save(job);
+    return await this.jobRepository.save(job);
+  }
+
+  async findAll(): Promise<JobEntity[]> {
+    return await this.jobRepository.find();
+  }
+
+  async findOne(id: string): Promise<JobEntity> {
+    const job = await this.jobRepository.findOne({
+      where: { id }
+    });
+
+    if (!job) {
+      throw new NotFoundException(`Job id: ${id} not found`);
     }
 
-      async findAll(): Promise<JobEntity[]> {
-        return await this.jobRepository.find();
-      }
+    return job;
+  }
 
-      async findOne(id: string): Promise<JobEntity> {
-        const job = await this.jobRepository.findOne({ where: { id } });
-        if (!job) {
-            throw new NotFoundException(`Job #${id} not found`);
-        }
+  async findOwnJob(id: string, user: UserEntity): Promise<JobEntity> {
+    const job = await this.findOne(id);
 
-        return job;
-      }
+    if (job.createdBy.id === user.id || user.role === UserRole.ADMIN) {
+      return job;
+    }
 
-      async update(id: string, updateDto: UpdateJobDto): Promise<JobEntity> {
-        const job = await this.findOne(id);
+    throw new ForbiddenException("You don't have permission on this job post");
+  }
 
-        Object.assign(job, updateDto);
+  async update(id: string, updateDto: UpdateJobDto | PatchJobDto, user: UserEntity): Promise<JobEntity> {
+    const job = await this.findOwnJob(id, user);
 
-        return await this.jobRepository.save(job);
-      }
+    Object.assign(job, updateDto);
 
-      async remove(id: string): Promise<void> {
-        const result = await this.jobRepository.delete(id);
+    return await this.jobRepository.save(job);
+  }
 
-        if (result.affected === 0) {
-          throw new NotFoundException(`Job #${id} not found`);
-        }
-      }
+  async remove(id: string, user: UserEntity): Promise<void> {
+    const job = await this.findOwnJob(id, user);
+
+    await this.jobRepository.delete(job.id);
+  }
 }

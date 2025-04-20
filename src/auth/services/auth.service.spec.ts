@@ -4,6 +4,7 @@ import { UserService } from '../../user/services/user.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UnauthorizedException } from '@nestjs/common';
+import { UserRole } from '../../user/models/user.entity';
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -14,6 +15,7 @@ describe('AuthService', () => {
     id: 1,
     email: 'test@example.com',
     password: 'hashed-password',
+    role: UserRole.USER,
   };
 
   const mockUserService = {
@@ -51,7 +53,7 @@ describe('AuthService', () => {
 
       const result = await authService.validateUserOrThrow(mockUser.email, 'password');
 
-      expect(result).toEqual({ id: mockUser.id, email: mockUser.email });
+      expect(result).toEqual({ id: mockUser.id, email: mockUser.email, role: UserRole.USER });
       expect(mockUserService.findByEmail).toHaveBeenCalledWith(mockUser.email);
     });
 
@@ -96,7 +98,9 @@ describe('AuthService', () => {
       const compareMock = jest.spyOn(bcrypt, 'hash') as jest.Mock;
       compareMock.mockResolvedValue(hashed);
 
-      mockUserService.createUser.mockResolvedValue({ id: 1, email: 'test@example.com' });
+      const userDto = { id: 1, email: 'test@example.com', role: UserRole.USER };
+
+      mockUserService.createUser.mockResolvedValue(userDto);
 
       const result = await authService.register('test@example.com', password);
 
@@ -104,9 +108,10 @@ describe('AuthService', () => {
       expect(mockUserService.createUser).toHaveBeenCalledWith({
         email: 'test@example.com',
         password: hashed,
+        role: UserRole.USER
       });
 
-      expect(result).toEqual({ id: 1, email: 'test@example.com' });
+      expect(result).toEqual(userDto);
     });
   });
 });

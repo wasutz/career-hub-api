@@ -2,19 +2,28 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { JobService } from './job.service';
 import { JobEntity } from '../models/job.entity';
 import { Repository } from 'typeorm';
-import { CreateJobDto } from '../dto/create-job.dto';
 import { NotFoundException } from '@nestjs/common';
 import { UpdateJobDto } from '../dto/update-job.dto';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { PatchJobDto } from '../dto/patch-job.dto';
+import { UserEntity, UserRole } from '../../user/models/user.entity';
 
 describe('JobService', () => {
   let service: JobService;
   let repo: jest.Mocked<Repository<JobEntity>>;
 
+  const mockUser: UserEntity = {
+    id: 1,
+    email: 'test@example.com',
+    role: UserRole.USER,
+    password: 'hashed-xxx'
+  }
+
   const mockJob = {
     id: '1',
     title: 'Test title',
     description: 'Test desc',
+    createdBy: mockUser
   } as JobEntity;
 
   beforeEach(async () => {
@@ -40,13 +49,19 @@ describe('JobService', () => {
 
   describe('create', () => {
     it('should create and return a job', async () => {
-      const dto: CreateJobDto = { title: 'NestJS Dev', description: 'API work', location: 'location', company: 'company'};
-      const createdJob = { ...dto, id: '1' } as JobEntity;
+      const dto = {
+        title: 'NestJS Dev',
+        description: 'API work',
+        location: 'location',
+        company: 'company',
+        createdBy: mockUser
+      };
+      const createdJob = { ...dto, id: '1', createdBy: mockUser} as JobEntity;
 
       repo.create.mockReturnValue(createdJob);
       repo.save.mockResolvedValue(createdJob);
 
-      const result = await service.create(dto);
+      const result = await service.create(dto, mockUser);
 
       expect(repo.create).toHaveBeenCalledWith(dto);
       expect(repo.save).toHaveBeenCalledWith(createdJob);
@@ -89,9 +104,24 @@ describe('JobService', () => {
       repo.findOne.mockResolvedValue(mockJob);
       repo.save.mockResolvedValue({ ...mockJob, ...updateDto });
 
-      const result = await service.update('1', updateDto);
+      const result = await service.update('1', updateDto, mockUser);
 
       expect(result.title).toBe(updateDto.title);
+      expect(repo.save).toHaveBeenCalled();
+    });
+  });
+
+  describe('patch', () => {
+    it('should patch and return the job', async () => {
+      const patchJobDto: PatchJobDto = { title: 'Only title'};
+
+      repo.findOne.mockResolvedValue(mockJob);
+      repo.save.mockResolvedValue({ ...mockJob, ...patchJobDto });
+
+      const result = await service.update('1', patchJobDto, mockUser);
+
+      expect(result.title).toBe(patchJobDto.title);
+      expect(result.description).toBe(mockJob.description);
       expect(repo.save).toHaveBeenCalled();
     });
   });

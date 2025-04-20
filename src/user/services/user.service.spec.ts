@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserEntity } from '../models/user.entity';
+import { UserEntity, UserRole } from '../models/user.entity';
 
 describe('UserService', () => {
   let userService: UserService;
@@ -12,6 +12,7 @@ describe('UserService', () => {
     id: 1,
     email: 'career@example.com',
     password: 'hashed-password',
+    role: UserRole.USER
   } as UserEntity;
 
   beforeEach(async () => {
@@ -39,7 +40,7 @@ describe('UserService', () => {
 
   describe('createUser', () => {
     it('should create and return a user', async () => {
-      const dto = { email: 'new@user.com', password: 'pass' };
+      const dto = { email: 'new@user.com', password: 'pass', role: UserRole.USER};
       const createdUser = { ...dto, id: 2 } as UserEntity;
 
       userRepository.create.mockReturnValue(createdUser);
