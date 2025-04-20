@@ -8,6 +8,12 @@ import { UserEntity } from '../../user/models/user.entity';
 import { User } from '../../auth/decorators/user.decorator';
 import { PatchJobDto } from '../dto/patch-job.dto';
 import { PaginationQueryDto } from '../dto/pagination-query.dto';
+import { ApiOkResponse } from '@nestjs/swagger';
+import { JobEntity } from '../models/job.entity';
+import { plainToInstance } from 'class-transformer';
+import { JobResponseDto } from '../dto/job-response.dto';
+import { PaginationResponseDto } from 'src/common/dto/pagination.dto';
+import { ApiOkResponsePaginated } from 'src/common/decorators/paginated-response';
 
 @Controller('jobs')
 export class JobController {
@@ -15,42 +21,59 @@ export class JobController {
 
     @Post()
     @UseGuards(JwtAuthGuard)
+    @ApiOkResponse({ type: JobResponseDto })
     create(@Body() createJobDto: CreateJobDto, @User() user: UserEntity) {
-        return this.jobService.create(createJobDto, user);
+        const job = this.jobService.create(createJobDto, user);
+
+        return plainToInstance(JobResponseDto, job);
     }
 
     @Get()
-    findAll(
+    @ApiOkResponsePaginated(JobResponseDto)
+    async findAll(
         @Query() pagination: PaginationQueryDto
     ) {
         const { page, pageSize } = pagination;
+        const { items, total} = await this.jobService.findAll(page, pageSize);
 
-        return this.jobService.findAll(page, pageSize);
+        return {
+            items: items.map(item => plainToInstance(JobResponseDto, item)),
+            total,
+        };
     }
 
     @Get(':id')
+    @ApiOkResponse({ type: JobResponseDto })
     findOne(@Param('id') id: string) {
-        return this.jobService.findOne(id);
+        const job = this.jobService.findOne(id);
+
+        return plainToInstance(JobResponseDto, job);
     }
 
     @Put(':id')
     @UseGuards(JwtAuthGuard)
+    @ApiOkResponse({ type: JobResponseDto })
     update(
         @Param('id') id: string,
         @Body() updateJobDto: UpdateJobDto,
         @User() user: UserEntity
     ) {
-        return this.jobService.update(id, updateJobDto, user);
+        const job = this.jobService.update(id, updateJobDto, user);
+
+        return plainToInstance(JobResponseDto, job);
     }
 
     @Patch(':id')
     @UseGuards(JwtAuthGuard)
+    @ApiOkResponse({ type: JobResponseDto })
     partialUpdate(
         @Param('id') id: string,
         @Body() patchJobDto: PatchJobDto,
         @User() user: UserEntity
     ) {
-        return this.jobService.update(id, patchJobDto, user);
+        const job = this.jobService.update(id, patchJobDto, user);
+
+        return plainToInstance(JobResponseDto, job);
     }
 
     @Delete(':id')
